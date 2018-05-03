@@ -1,0 +1,25 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="HomeTheme" parent="@android:style/Theme.Holo.Light">
+        <item name="android:actionBarStyle">@style/HomeActionBarTheme</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:statusBarColor">@color/blue4</item>
+        <item name="android:navigationBarColor">@color/transparent</item>
+        <item name="android:colorEdgeEffect">@color/blue4</item>
+    </style>
+
+    <style name="HomeActionBarTheme" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:background">@color/blue4</item>
+
+
+    </style>
+
+</resources>

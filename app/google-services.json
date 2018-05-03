@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "260964560935",
+    "firebase_url": "https://laporgan-9d4f4.firebaseio.com",
+    "project_id": "laporgan-9d4f4",
+    "storage_bucket": "laporgan-9d4f4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:260964560935:android:b8da608c478f552a",
+        "android_client_info": {
+          "package_name": "com.hurahura.ray.laporgan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "260964560935-0c2o7lsp60shrklejrt6rcf3m0s379qc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hurahura.ray.laporgan",
+            "certificate_hash": "d79d30f2b9c29cfb8f92648e6bf2020842cbd23d"
+          }
+        },
+        {
+          "client_id": "260964560935-hr2p7u7vj63pf1f3jinvpfpneplpunqr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdJjizXO6NlT8atwA6zPvrvN76ockU1U0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "260964560935-hr2p7u7vj63pf1f3jinvpfpneplpunqr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
