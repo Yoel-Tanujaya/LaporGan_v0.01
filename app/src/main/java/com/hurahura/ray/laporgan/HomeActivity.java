@@ -1,10 +1,15 @@
 package com.hurahura.ray.laporgan;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -24,6 +29,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,36 +49,54 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.wonderkiln.camerakit.CameraKit;
+import com.wonderkiln.camerakit.CameraKitEventCallback;
+import com.wonderkiln.camerakit.CameraKitImage;
+import com.wonderkiln.camerakit.CameraView;
 
 import org.w3c.dom.ProcessingInstruction;
 
 import java.lang.ref.PhantomReference;
 
+import es.dmoral.toasty.Toasty;
+
 public class HomeActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private FloatingActionsMenu main_fab_home;
-    private View action_sampah;
-    private View action_lapor;
-    private View home_report_form;
     private Button btnSubmit;
     private Button fab_home;
-    private Button fab_close;
-    private ActionBar actionBar;
-    private FirebaseAuth mAuth;
-    private GoogleSignInClient mGoogleSignInClient;
+    private Button btnCloseCamera;
+    private Button btnCapture;
+    private Button btnFlash;
+    private Button btnJenisLaporan;
+    private Button btnImageDiscard;
+
+    private TextView tvJenisLaporan;
+    private TextView tvFab;
+
     private LocationListener mLocationListener;
-    GPSTracker gpsTracker;
+    private GPSTracker gpsTracker;
     private LatLng currentLocation;
     private GoogleMap mMap;
+    private CameraView cameraView;
+
+    private View cameraViewHolder;
+    private View imagePreview;
+
+    private ImageView imgCaptured;
+
+    //0 = lapor, 1 = sampah
+    private int jenisLaporan = 0;
+    private int mShortAnimationDuration = 5;
 
     public User user;
+
+    private long captureStartTime;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_home, menu);
         return true;
     }
-
 
     @SuppressLint("MissingPermission")
     @Override
@@ -120,36 +144,94 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        fab_home = (Button) findViewById(R.id.fab_home);
-        home_report_form = findViewById(R.id.home_report_form);
+        fab_home = findViewById(R.id.fab_home);
         btnSubmit = findViewById(R.id.btnSubmit);
-        fab_close = findViewById(R.id.fab_home_close);
+        btnCloseCamera = findViewById(R.id.btnCloseCamera);
+        cameraView = findViewById(R.id.cameraView);
+        btnCapture = findViewById(R.id.btnCapture);
+        btnFlash = findViewById(R.id.btnFlash);
+        btnJenisLaporan = findViewById(R.id.btnJenisLaporan);
+        tvJenisLaporan = findViewById(R.id.tvJenisLaporan);
+        tvFab = findViewById(R.id.fab_text);
+        cameraViewHolder = findViewById(R.id.cameraViewHolder);
+        imagePreview = findViewById(R.id.imagePreview);
+        imgCaptured = findViewById(R.id.imgCaptured);
+        btnImageDiscard = findViewById(R.id.btnImageDiscard);
+
         fab_home.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                laporOnClick();
+                startLapor();
             }
         });
-        btnSubmit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(getBaseContext(), "Tombol Submit di klik", Toast.LENGTH_SHORT);
-            }
-        });
-        fab_close.setOnClickListener(new View.OnClickListener() {
+        btnCloseCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 closeOnClick();
             }
         });
+        btnFlash.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (cameraView.getFlash()==CameraKit.Constants.FLASH_TORCH) {
+                    cameraView.setFlash(CameraKit.Constants.FLASH_OFF);
+                    btnFlash.setBackground(getDrawable(R.drawable.ic_flashoff));
+                }
+                else {
+                    cameraView.setFlash(CameraKit.Constants.FLASH_TORCH);
+                    btnFlash.setBackground(getDrawable(R.drawable.ic_flashon));
+                }
+            }
+        });
+        btnJenisLaporan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (jenisLaporan==0) {
+                    jenisLaporan=1;
+                    btnJenisLaporan.setBackground(getDrawable(R.drawable.ic_sampah));
+                    tvJenisLaporan.setText("JEMPUT SAMPAH");
+                }
+                else {
+                    jenisLaporan=0;
+                    btnJenisLaporan.setBackground(getDrawable(R.drawable.ic_lapor));
+                    tvJenisLaporan.setText("LAPOR KELUHAN");
+                }
+            }
+        });
+        btnCloseCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cameraViewHolder.setVisibility(View.GONE);
+                tvFab.setVisibility(View.VISIBLE);
+                fab_home.setVisibility(View.VISIBLE);
+            }
+        });
+        btnCapture.setOnClickListener(captureClick);
     }
 
+    private View.OnClickListener captureClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            captureStartTime = System.currentTimeMillis();
+            cameraView.captureImage(new CameraKitEventCallback<CameraKitImage>() {
+                @Override
+                public void callback(CameraKitImage image) {
+                    byte[] jpeg = image.getJpeg();
+                    long callbackTime = System.currentTimeMillis();
+                    cameraViewHolder.setVisibility(View.GONE);
+                    imagePreview.setVisibility(View.VISIBLE);
+                    //imgCaptured.setImageBitmap(setImage(jpeg));
+
+                }
+            });
+        }
+    };
+
     private void closeOnClick() {
-        home_report_form.setVisibility(View.INVISIBLE);
         btnSubmit.setVisibility(View.INVISIBLE);
         findViewById(R.id.fab_text).setVisibility(View.VISIBLE);
         fab_home.setVisibility(View.VISIBLE);
-        fab_close.setVisibility(View.INVISIBLE);
+        btnCloseCamera.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -183,12 +265,17 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 //        return (res == PackageManager.PERMISSION_GRANTED);
 //    }
 
-    public void laporOnClick() {
-        home_report_form.setVisibility(View.VISIBLE);
-        btnSubmit.setVisibility(View.VISIBLE);
-        findViewById(R.id.fab_text).setVisibility(View.INVISIBLE);
+    public void startLapor() {
         fab_home.setVisibility(View.INVISIBLE);
-        fab_close.setVisibility(View.VISIBLE);
+        tvFab.setVisibility(View.INVISIBLE);
+        cameraViewHolder.setAlpha(0f);
+        cameraViewHolder.setVisibility(View.VISIBLE);
+        cameraViewHolder.animate()
+                .alpha(1f)
+                .setDuration(10)
+                .setListener(null);
+        cameraView.setMethod(CameraKit.Constants.METHOD_STANDARD);
+        cameraView.setFlash(0);
     }
 
     public void setStatusBarColor() {
@@ -212,8 +299,15 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     protected void onResume() {
         super.onResume();
+        cameraView.start();
         gpsTracker = new GPSTracker(this);
         currentLocation = new LatLng(gpsTracker.getLatitude(), gpsTracker.getLongitude());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        cameraView.stop();
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -250,5 +344,45 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                         finish();
                     }
                 });
+    }
+
+    private void crossfade(final View load, View content) {
+
+        // Set the content view to 0% opacity but visible, so that it is visible
+        // (but fully transparent) during the animation.
+        content.setAlpha(0f);
+        content.setVisibility(View.VISIBLE);
+
+        // Animate the content view to 100% opacity, and clear any animation
+        // listener set on the view.
+        content.animate()
+                .alpha(1f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(null);
+
+        // Animate the loading view to 0% opacity. After the animation ends,
+        // set its visibility to GONE as an optimization step (it won't
+        // participate in layout passes, etc.)
+        load.animate()
+                .alpha(0f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        load.setVisibility(View.GONE);
+                    }
+                });
+    }
+
+    public Bitmap setImage(byte[] jpeg) {
+        if (jpeg==null) {
+            Toasty.error(getApplicationContext(),"Image Error",4,true).show();
+            finish();
+            return null;
+        }
+        else {
+            Bitmap bm = BitmapFactory.decodeByteArray(jpeg,0,jpeg.length);
+            return bm;
+        }
     }
 }

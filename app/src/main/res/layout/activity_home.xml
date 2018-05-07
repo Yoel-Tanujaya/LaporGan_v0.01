@@ -18,10 +18,9 @@
         android:id="@+id/btnSubmit"
         android:layout_width="match_parent"
         android:layout_height="44dp"
-        android:layout_marginBottom="48dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         android:background="@drawable/button_submit"
         android:fontFamily="@font/product_sans_b"
         android:text="@string/kirim"
@@ -30,62 +29,118 @@
         android:visibility="invisible"
         fab:layout_constraintBottom_toBottomOf="parent"
         fab:layout_constraintEnd_toEndOf="parent"
-        fab:layout_constraintHorizontal_bias="1.0"
-        fab:layout_constraintStart_toStartOf="parent"
-        fab:layout_constraintTop_toBottomOf="@+id/home_report_form"
-        fab:layout_constraintVertical_bias="1.0" />
+        fab:layout_constraintHorizontal_bias="0.0"
+        fab:layout_constraintStart_toStartOf="parent" />
 
-    <com.wonderkiln.camerakit.CameraView
-        android:id="@+id/cameraView"
+    <EditText
+        android:id="@+id/txtDescription"
         android:layout_width="0dp"
-        android:layout_height="394dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/home_borderbox_form"
+        android:ems="10"
+        android:fontFamily="@font/product_sans_r"
+        android:gravity="top"
+        android:hint="Deskripsi Laporan*"
+        android:inputType="textMultiLine"
+        android:maxLines="4"
+        android:paddingBottom="6dp"
+        android:paddingLeft="6dp"
+        android:paddingRight="6dp"
+        android:paddingTop="6dp"
+        android:scrollbars="vertical"
+        android:singleLine="false"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black_opaque"
+        android:textSize="18sp"
+        android:visibility="gone"
+        fab:layout_constraintBottom_toTopOf="@+id/imagePreview"
+        fab:layout_constraintEnd_toEndOf="parent"
+        fab:layout_constraintHorizontal_bias="0.0"
+        fab:layout_constraintStart_toStartOf="parent"
+        fab:layout_constraintTop_toTopOf="parent" />
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/cameraViewHolder"
+        android:layout_width="380dp"
+        android:layout_height="380dp"
         android:layout_marginBottom="32dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:background="@color/black"
         android:visibility="gone"
-        fab:ckCropOutput="true"
-        fab:ckFacing="back"
-        fab:ckFlash="off"
-        fab:ckFocus="continuous"
-        fab:ckJpegQuality="100"
-        fab:ckMethod="standard"
-        fab:ckPermissions="strict"
         fab:layout_constraintBottom_toBottomOf="parent"
         fab:layout_constraintEnd_toEndOf="parent"
-        fab:layout_constraintStart_toStartOf="parent">
+        fab:layout_constraintHorizontal_bias="0.466"
+        fab:layout_constraintStart_toStartOf="parent"
+        fab:layout_constraintTop_toTopOf="parent"
+        fab:layout_constraintVertical_bias="1.0">
+
+        <com.wonderkiln.camerakit.CameraView
+            android:id="@+id/cameraView"
+            android:layout_width="380dp"
+            android:layout_height="380dp"
+            android:background="@color/black"
+            android:visibility="visible"
+            fab:ckCropOutput="true"
+            fab:ckFacing="back"
+            fab:ckFlash="off"
+            fab:ckFocus="continuous"
+            fab:ckJpegQuality="100"
+            fab:ckMethod="standard"
+            fab:ckPermissions="strict"
+            fab:layout_constraintBottom_toBottomOf="parent"
+            fab:layout_constraintEnd_toEndOf="parent"
+            fab:layout_constraintStart_toStartOf="parent"
+            fab:layout_constraintTop_toTopOf="parent">
+
+        </com.wonderkiln.camerakit.CameraView>
 
         <Button
             android:id="@+id/btnCapture"
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_gravity="bottom|center"
-            android:layout_marginBottom="20dp"
-            android:background="@drawable/ic_shuttercam" />
+            android:layout_marginBottom="32dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/ic_shuttercam"
+            android:visibility="visible"
+            fab:layout_constraintBottom_toBottomOf="@+id/cameraView"
+            fab:layout_constraintEnd_toEndOf="parent"
+            fab:layout_constraintStart_toStartOf="parent" />
 
         <Button
             android:id="@+id/btnFlash"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_gravity="bottom|right|center"
-            android:layout_marginBottom="42dp"
-            android:layout_marginRight="66dp"
-            android:background="@drawable/ic_flashoff" />
+            android:layout_marginBottom="48dp"
+            android:layout_marginEnd="56dp"
+            android:background="@drawable/ic_flashoff"
+            android:visibility="visible"
+            fab:layout_constraintBottom_toBottomOf="@+id/cameraViewHolder"
+            fab:layout_constraintEnd_toEndOf="parent" />
 
         <Button
             android:id="@+id/btnJenisLaporan"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_gravity="bottom|left"
-            android:layout_marginBottom="42dp"
-            android:layout_marginLeft="66dp"
-            android:background="@drawable/ic_lapor" />
+            android:layout_marginBottom="48dp"
+            android:layout_marginStart="56dp"
+            android:background="@drawable/ic_lapor"
+            android:visibility="visible"
+            fab:layout_constraintBottom_toBottomOf="@+id/cameraViewHolder"
+            fab:layout_constraintStart_toStartOf="parent" />
 
         <TextView
             android:id="@+id/tvJenisLaporan"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:background="@drawable/tv_jenis_laporan_cameraview"
             android:fontFamily="@font/product_sans_b"
@@ -94,60 +149,25 @@
             android:text="@string/lapor"
             android:textAlignment="textStart"
             android:textAllCaps="true"
-            android:textColor="@color/white_pressed"
-            android:textSize="12sp" />
-    </com.wonderkiln.camerakit.CameraView>
-
-    <LinearLayout
-        android:id="@+id/home_report_form"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/home_borderbox_form"
-        android:orientation="vertical"
-        android:padding="8dp"
-        android:visibility="invisible"
-        fab:layout_constraintEnd_toEndOf="parent"
-        fab:layout_constraintHorizontal_bias="1.0"
-        fab:layout_constraintStart_toStartOf="parent"
-        fab:layout_constraintTop_toTopOf="parent">
-
-        <EditText
-            android:id="@+id/txtTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/blue3"
-            android:ems="10"
-            android:fontFamily="@font/product_sans_b"
-            android:hint="Judul Laporan*"
-            android:inputType="textShortMessage"
-            android:paddingLeft="4dp"
-            android:paddingRight="4dp"
             android:textColor="@color/black"
-            android:textColorHint="@color/black_opaque"
-            android:textSize="20sp" />
+            android:textSize="12sp"
+            android:visibility="visible"
+            fab:layout_constraintStart_toStartOf="parent"
+            fab:layout_constraintTop_toTopOf="parent" />
 
-        <EditText
-            android:id="@+id/txtDescription"
-            android:layout_width="match_parent"
-            android:layout_height="134dp"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="@color/blue3"
-            android:ems="10"
-            android:fontFamily="@font/product_sans_r"
-            android:gravity="top"
-            android:hint="Deskripsi Laporan"
-            android:inputType="textMultiLine"
-            android:paddingLeft="4dp"
-            android:paddingRight="4dp"
-            android:singleLine="false"
-            android:textColor="@color/black"
-            android:textColorHint="@color/black_opaque"
-            android:textSize="18sp" />
+        <Button
+            android:id="@+id/btnCloseCamera"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_gravity="top|right"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/ic_fab_home_close"
+            android:visibility="visible"
+            fab:layout_constraintEnd_toEndOf="parent"
+            fab:layout_constraintTop_toTopOf="parent" />
 
-    </LinearLayout>
+    </android.support.constraint.ConstraintLayout>
 
     <Button
         android:id="@+id/fab_home"
@@ -159,17 +179,18 @@
         android:background="@drawable/ic_fab_home"
         android:clickable="true"
         android:elevation="4dp"
-        android:visibility="invisible"
+        android:visibility="visible"
         fab:layout_constraintBottom_toBottomOf="parent"
         fab:layout_constraintEnd_toEndOf="parent" />
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/imagePreview"
-        android:layout_width="394dp"
-        android:layout_height="394dp"
-        android:layout_marginBottom="32dp"
+        android:layout_width="0dp"
+        android:layout_height="378dp"
+        android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:background="@drawable/home_borderbox_form"
         android:visibility="gone"
         fab:layout_constraintBottom_toBottomOf="parent"
         fab:layout_constraintEnd_toEndOf="parent"
@@ -179,13 +200,11 @@
             android:id="@+id/imgCaptured"
             android:layout_width="394dp"
             android:layout_height="394dp"
-            android:layout_marginBottom="32dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
+            android:visibility="visible"
             fab:layout_constraintBottom_toBottomOf="@+id/map"
             fab:layout_constraintEnd_toEndOf="parent"
             fab:layout_constraintStart_toStartOf="parent"
-            fab:srcCompat="@drawable/button_submit_pressed" />
+            fab:layout_constraintTop_toTopOf="parent" />
 
         <Button
             android:id="@+id/btnImageDiscard"
@@ -194,23 +213,10 @@
             android:layout_marginEnd="8dp"
             android:layout_marginTop="8dp"
             android:background="@drawable/ic_fab_home_close"
+            android:visibility="visible"
             fab:layout_constraintEnd_toEndOf="parent"
             fab:layout_constraintTop_toTopOf="parent" />
     </android.support.constraint.ConstraintLayout>
-
-    <Button
-        android:id="@+id/fab_home_close"
-        style="@android:style/Widget.Button"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:background="@drawable/ic_fab_home_close"
-        android:clickable="true"
-        android:elevation="4dp"
-        android:visibility="invisible"
-        fab:layout_constraintBottom_toBottomOf="parent"
-        fab:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
         android:id="@+id/fab_text"
@@ -227,7 +233,7 @@
         android:paddingTop="4dp"
         android:text="@string/add"
         android:textColor="@color/white"
-        android:visibility="invisible"
+        android:visibility="visible"
         fab:layout_constraintBottom_toBottomOf="parent"
         fab:layout_constraintEnd_toStartOf="@+id/fab_home"
         fab:layout_constraintHorizontal_bias="1.0"
@@ -235,40 +241,40 @@
 
 
     <!--<com.getbase.floatingactionbutton.FloatingActionsMenu-->
-        <!--android:id="@+id/fab_home_main"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_alignParentEnd="true"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:layout_marginBottom="16dp"-->
-        <!--android:layout_marginEnd="16dp"-->
-        <!--fab:fab_addButtonColorNormal="@color/white"-->
-        <!--fab:fab_addButtonColorPressed="@color/white_pressed"-->
-        <!--fab:fab_addButtonPlusIconColor="@color/blue4"-->
-        <!--fab:fab_labelsPosition="left"-->
-        <!--fab:layout_constraintBottom_toBottomOf="parent"-->
-        <!--fab:layout_constraintEnd_toEndOf="parent">-->
+    <!--android:id="@+id/fab_home_main"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_alignParentBottom="true"-->
+    <!--android:layout_alignParentEnd="true"-->
+    <!--android:layout_alignParentRight="true"-->
+    <!--android:layout_marginBottom="16dp"-->
+    <!--android:layout_marginEnd="16dp"-->
+    <!--fab:fab_addButtonColorNormal="@color/white"-->
+    <!--fab:fab_addButtonColorPressed="@color/white_pressed"-->
+    <!--fab:fab_addButtonPlusIconColor="@color/blue4"-->
+    <!--fab:fab_labelsPosition="left"-->
+    <!--fab:layout_constraintBottom_toBottomOf="parent"-->
+    <!--fab:layout_constraintEnd_toEndOf="parent">-->
 
-        <!--<com.getbase.floatingactionbutton.FloatingActionButton-->
-            <!--android:id="@+id/action_sampah"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--fab:fab_colorNormal="@color/blue4"-->
-            <!--fab:fab_colorPressed="@color/blue3"-->
-            <!--fab:fab_icon="@drawable/ic_sampah"-->
-            <!--fab:fab_size="mini"-->
-            <!--fab:fab_title="@string/sampah" />-->
+    <!--<com.getbase.floatingactionbutton.FloatingActionButton-->
+    <!--android:id="@+id/action_sampah"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--fab:fab_colorNormal="@color/blue4"-->
+    <!--fab:fab_colorPressed="@color/blue3"-->
+    <!--fab:fab_icon="@drawable/ic_sampah"-->
+    <!--fab:fab_size="mini"-->
+    <!--fab:fab_title="@string/sampah" />-->
 
-        <!--<com.getbase.floatingactionbutton.FloatingActionButton-->
-            <!--android:id="@+id/action_lapor"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--fab:fab_colorNormal="@color/blue4"-->
-            <!--fab:fab_colorPressed="@color/blue3"-->
-            <!--fab:fab_icon="@drawable/ic_lapor"-->
-            <!--fab:fab_size="mini"-->
-            <!--fab:fab_title="@string/lapor" />-->
+    <!--<com.getbase.floatingactionbutton.FloatingActionButton-->
+    <!--android:id="@+id/action_lapor"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--fab:fab_colorNormal="@color/blue4"-->
+    <!--fab:fab_colorPressed="@color/blue3"-->
+    <!--fab:fab_icon="@drawable/ic_lapor"-->
+    <!--fab:fab_size="mini"-->
+    <!--fab:fab_title="@string/lapor" />-->
 
     <!--</com.getbase.floatingactionbutton.FloatingActionsMenu>-->
 
