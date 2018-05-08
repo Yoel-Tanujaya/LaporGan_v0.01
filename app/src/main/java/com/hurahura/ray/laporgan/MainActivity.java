@@ -39,6 +39,8 @@ import es.dmoral.toasty.Toasty;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "GoogleActivity";
     private static final int RC_SIGN_IN = 9001;
+
+    //Password Pattern: Minimum 6 Characters, contains at least 1 number, 1 uppercase letter. Special characters is optional
     private static final String PASSWORD_PATTERN = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{6,}";
 
     public static FirebaseAuth mAuth;
@@ -65,16 +67,20 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //request permission when launch
         ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+
+        //set statusbar color to desired color -> #00a8e8 / blue4
+        Window window = this.getWindow();
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(getResources().getColor(R.color.blue4));
+
+        //get user from firebase authentication for choosing the activity
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        Window window = this.getWindow();
 
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-
-        window.setStatusBarColor(getResources().getColor(R.color.blue4));
         if (currentUser!=null) {
             startActivity(new Intent(this,HomeActivity.class));
             finish();
@@ -84,21 +90,24 @@ public class MainActivity extends AppCompatActivity {
             setTheme(android.R.style.Theme_Material_NoActionBar);
             setContentView(R.layout.activity_main);
 
+            //---------------------------------------------EditText------------------------------------------
             txtEmail = (EditText) findViewById(R.id.txtEmail);
             txtPass = (EditText) findViewById(R.id.txtPass);
             txtName = (EditText) findViewById(R.id.txtName);
 
+            //---------------------------------------------TextView------------------------------------------
             tvName = (TextView) findViewById(R.id.tvName);
             tvSeparator = (TextView) findViewById(R.id.tvSeparator);
 
+            //---------------------------------------------Button------------------------------------------
             btnLogin = (Button) findViewById(R.id.btnLogin);
             btnGoogleLogin = (Button) findViewById(R.id.btnGoogle);
             btnSignup = (Button) findViewById(R.id.btnSignup);
-
             btnNewUser = (Button) findViewById(R.id.btnNewUser);
             btnForgotPass = (Button) findViewById(R.id.btnForgotPass);
             btnBackToLogin = (Button) findViewById(R.id.btnBackToLogin);
 
+            //GSO object for Firebase Authentication
             GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestIdToken(getString(R.string.default_web_client_id))
                     .requestEmail()
@@ -159,8 +168,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
         Log.d(TAG,"firebaseAuthWithGoogle: " + account.getId());

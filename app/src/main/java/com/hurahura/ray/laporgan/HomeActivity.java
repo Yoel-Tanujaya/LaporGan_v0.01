@@ -10,6 +10,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -56,11 +58,17 @@ import com.wonderkiln.camerakit.CameraView;
 
 import org.w3c.dom.ProcessingInstruction;
 
+import java.io.IOException;
 import java.lang.ref.PhantomReference;
+import java.util.List;
+import java.util.Locale;
 
 import es.dmoral.toasty.Toasty;
 
 public class HomeActivity extends AppCompatActivity implements OnMapReadyCallback {
+
+    Geocoder geocoder;
+    List<Address> addresses;
 
     private Button btnSubmit;
     private Button fab_home;
@@ -68,10 +76,10 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Button btnCapture;
     private Button btnFlash;
     private Button btnJenisLaporan;
-    private Button btnImageDiscard;
 
     private TextView tvJenisLaporan;
     private TextView tvFab;
+    private TextView tvLocation;
 
     private LocationListener mLocationListener;
     private GPSTracker gpsTracker;
@@ -80,9 +88,6 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     private CameraView cameraView;
 
     private View cameraViewHolder;
-    private View imagePreview;
-
-    private ImageView imgCaptured;
 
     //0 = lapor, 1 = sampah
     private int jenisLaporan = 0;
@@ -133,6 +138,8 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         };
 
+        geocoder = new Geocoder(this, Locale.getDefault());
+
 
         LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -154,14 +161,15 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         tvJenisLaporan = findViewById(R.id.tvJenisLaporan);
         tvFab = findViewById(R.id.fab_text);
         cameraViewHolder = findViewById(R.id.cameraViewHolder);
-        imagePreview = findViewById(R.id.imagePreview);
-        imgCaptured = findViewById(R.id.imgCaptured);
-        btnImageDiscard = findViewById(R.id.btnImageDiscard);
+        tvLocation = findViewById(R.id.tvLocation);
+
+
 
         fab_home.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startLapor();
+
             }
         });
         btnCloseCamera.setOnClickListener(new View.OnClickListener() {
@@ -206,7 +214,6 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 fab_home.setVisibility(View.VISIBLE);
             }
         });
-        btnCapture.setOnClickListener(captureClick);
     }
 
     private View.OnClickListener captureClick = new View.OnClickListener() {
@@ -216,11 +223,6 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
             cameraView.captureImage(new CameraKitEventCallback<CameraKitImage>() {
                 @Override
                 public void callback(CameraKitImage image) {
-                    byte[] jpeg = image.getJpeg();
-                    long callbackTime = System.currentTimeMillis();
-                    cameraViewHolder.setVisibility(View.GONE);
-                    imagePreview.setVisibility(View.VISIBLE);
-                    //imgCaptured.setImageBitmap(setImage(jpeg));
 
                 }
             });
@@ -280,11 +282,8 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public void setStatusBarColor() {
         Window window = this.getWindow();
-
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-
         window.setStatusBarColor(getResources().getColor(R.color.blue4));
     }
 
@@ -295,6 +294,12 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setMyLocationEnabled(true);
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 17));
+        try {
+            addresses = geocoder.getFromLocation(currentLocation.latitude, currentLocation.longitude, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     protected void onResume() {
@@ -302,6 +307,12 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         cameraView.start();
         gpsTracker = new GPSTracker(this);
         currentLocation = new LatLng(gpsTracker.getLatitude(), gpsTracker.getLongitude());
+        try {
+            addresses = geocoder.getFromLocation(currentLocation.latitude, currentLocation.longitude, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        tvLocation.setText(addresses.get(0).getAddressLine(0));
     }
 
     @Override
@@ -346,43 +357,4 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 });
     }
 
-    private void crossfade(final View load, View content) {
-
-        // Set the content view to 0% opacity but visible, so that it is visible
-        // (but fully transparent) during the animation.
-        content.setAlpha(0f);
-        content.setVisibility(View.VISIBLE);
-
-        // Animate the content view to 100% opacity, and clear any animation
-        // listener set on the view.
-        content.animate()
-                .alpha(1f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(null);
-
-        // Animate the loading view to 0% opacity. After the animation ends,
-        // set its visibility to GONE as an optimization step (it won't
-        // participate in layout passes, etc.)
-        load.animate()
-                .alpha(0f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        load.setVisibility(View.GONE);
-                    }
-                });
-    }
-
-    public Bitmap setImage(byte[] jpeg) {
-        if (jpeg==null) {
-            Toasty.error(getApplicationContext(),"Image Error",4,true).show();
-            finish();
-            return null;
-        }
-        else {
-            Bitmap bm = BitmapFactory.decodeByteArray(jpeg,0,jpeg.length);
-            return bm;
-        }
-    }
 }

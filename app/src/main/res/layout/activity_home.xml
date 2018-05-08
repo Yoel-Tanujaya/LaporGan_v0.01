@@ -32,37 +32,6 @@
         fab:layout_constraintHorizontal_bias="0.0"
         fab:layout_constraintStart_toStartOf="parent" />
 
-    <EditText
-        android:id="@+id/txtDescription"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/home_borderbox_form"
-        android:ems="10"
-        android:fontFamily="@font/product_sans_r"
-        android:gravity="top"
-        android:hint="Deskripsi Laporan*"
-        android:inputType="textMultiLine"
-        android:maxLines="4"
-        android:paddingBottom="6dp"
-        android:paddingLeft="6dp"
-        android:paddingRight="6dp"
-        android:paddingTop="6dp"
-        android:scrollbars="vertical"
-        android:singleLine="false"
-        android:textColor="@color/black"
-        android:textColorHint="@color/black_opaque"
-        android:textSize="18sp"
-        android:visibility="gone"
-        fab:layout_constraintBottom_toTopOf="@+id/imagePreview"
-        fab:layout_constraintEnd_toEndOf="parent"
-        fab:layout_constraintHorizontal_bias="0.0"
-        fab:layout_constraintStart_toStartOf="parent"
-        fab:layout_constraintTop_toTopOf="parent" />
-
     <android.support.constraint.ConstraintLayout
         android:id="@+id/cameraViewHolder"
         android:layout_width="380dp"
@@ -70,7 +39,7 @@
         android:layout_marginBottom="32dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:visibility="gone"
+        android:visibility="invisible"
         fab:layout_constraintBottom_toBottomOf="parent"
         fab:layout_constraintEnd_toEndOf="parent"
         fab:layout_constraintHorizontal_bias="0.466"
@@ -80,7 +49,7 @@
 
         <com.wonderkiln.camerakit.CameraView
             android:id="@+id/cameraView"
-            android:layout_width="380dp"
+            android:layout_width="0dp"
             android:layout_height="380dp"
             android:background="@color/black"
             android:visibility="visible"
@@ -183,41 +152,6 @@
         fab:layout_constraintBottom_toBottomOf="parent"
         fab:layout_constraintEnd_toEndOf="parent" />
 
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/imagePreview"
-        android:layout_width="0dp"
-        android:layout_height="378dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:background="@drawable/home_borderbox_form"
-        android:visibility="gone"
-        fab:layout_constraintBottom_toBottomOf="parent"
-        fab:layout_constraintEnd_toEndOf="parent"
-        fab:layout_constraintStart_toStartOf="parent">
-
-        <ImageView
-            android:id="@+id/imgCaptured"
-            android:layout_width="394dp"
-            android:layout_height="394dp"
-            android:visibility="visible"
-            fab:layout_constraintBottom_toBottomOf="@+id/map"
-            fab:layout_constraintEnd_toEndOf="parent"
-            fab:layout_constraintStart_toStartOf="parent"
-            fab:layout_constraintTop_toTopOf="parent" />
-
-        <Button
-            android:id="@+id/btnImageDiscard"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/ic_fab_home_close"
-            android:visibility="visible"
-            fab:layout_constraintEnd_toEndOf="parent"
-            fab:layout_constraintTop_toTopOf="parent" />
-    </android.support.constraint.ConstraintLayout>
-
     <TextView
         android:id="@+id/fab_text"
         android:layout_width="wrap_content"
@@ -238,6 +172,59 @@
         fab:layout_constraintEnd_toStartOf="@+id/fab_home"
         fab:layout_constraintHorizontal_bias="1.0"
         fab:layout_constraintStart_toStartOf="parent" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:background="@color/white"
+        android:elevation="4dp"
+        android:orientation="vertical"
+        fab:layout_constraintBottom_toTopOf="@+id/cameraViewHolder"
+        fab:layout_constraintEnd_toEndOf="parent"
+        fab:layout_constraintStart_toStartOf="parent"
+        fab:layout_constraintTop_toTopOf="parent"
+        fab:layout_constraintVertical_bias="0.0">
+
+        <TextView
+            android:id="@+id/tvLocationTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/product_sans_b"
+            android:paddingEnd="16dp"
+            android:paddingStart="16dp"
+            android:text="Lokasi Anda"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:paddingStart="24dp">
+
+            <ImageView
+                android:id="@+id/imgIconLocation"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_weight="0"
+                fab:srcCompat="@drawable/ic_location" />
+
+            <TextView
+                android:id="@+id/tvLocation"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/product_sans_r"
+                android:paddingEnd="8dp"
+                android:paddingStart="8dp"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+    </LinearLayout>
 
 
     <!--<com.getbase.floatingactionbutton.FloatingActionsMenu-->
