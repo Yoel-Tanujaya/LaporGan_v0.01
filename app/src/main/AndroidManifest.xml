@@ -56,6 +56,7 @@
         <activity android:name=".HomeActivity"></activity>
         <activity android:name=".ProfileActivity"></activity>
         <activity android:name=".HistoryActivity"></activity>
+        <activity android:name=".PreviewActivity"></activity>
     </application>
 
 </manifest>

@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static GoogleSignInClient mGoogleSignInClient;
 
-    public User user;
+    public static User USER;
 
     private EditText txtEmail;
     private EditText txtPass;
@@ -72,16 +72,15 @@ public class MainActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
 
         //set statusbar color to desired color -> #00a8e8 / blue4
-        Window window = this.getWindow();
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(getResources().getColor(R.color.blue4));
+        setStatusBar();
 
         //get user from firebase authentication for choosing the activity
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
+
         if (currentUser!=null) {
+            USER = new User(currentUser.getUid(),currentUser.getEmail(),currentUser.getDisplayName());
             startActivity(new Intent(this,HomeActivity.class));
             finish();
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -163,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account);
+
             } catch (ApiException e) {
                 Log.w(TAG, "Google Sign in Failed",e);
             }
@@ -171,7 +171,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
         Log.d(TAG,"firebaseAuthWithGoogle: " + account.getId());
-
         AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(),null);
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -179,8 +178,12 @@ public class MainActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             Log.d(TAG,"signInWithCredential:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            startActivity(new Intent(getBaseContext(),HomeActivity.class));
+                            FirebaseUser users = mAuth.getCurrentUser();
+                            USER = new User(users.getUid(),users.getEmail(),users.getDisplayName());
+                            Intent intent = new Intent(getBaseContext(),HomeActivity.class);
+                            intent.putExtra(HomeActivity.class.getName(),USER);
+                            startActivity(intent);
+                            finish();
                         }
                         else {
                             Log.w(TAG,"signInWithCredential:failure", task.getException());
@@ -198,8 +201,12 @@ public class MainActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            Toasty.success(getApplicationContext(),"Success. Please login to continue...").show();
+                            FirebaseUser users = mAuth.getCurrentUser();
+                            USER = new User(users.getUid(),users.getEmail(),txtName.getText().toString());
+                            Intent intent = new Intent(getBaseContext(),HomeActivity.class);
+                            intent.putExtra(HomeActivity.class.getName(),USER);
+                            startActivity(intent);
+                            finish();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
@@ -218,9 +225,14 @@ public class MainActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
+                            FirebaseUser users = mAuth.getCurrentUser();
+                            USER = new User(users.getUid(),users.getEmail(),users.getDisplayName());
+                            Intent intent = new Intent(getBaseContext(),HomeActivity.class);
+                            intent.putExtra(HomeActivity.class.getName(),USER);
+                            startActivity(intent);
                             Toasty.success(getApplicationContext(),"Login Success",4,true).show();
                             startActivity(new Intent(getBaseContext(), HomeActivity.class));
+                            finish();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
@@ -278,5 +290,16 @@ public class MainActivity extends AppCompatActivity {
             txtEmail.setText("");
             txtPass.setText("");
         }
+    }
+
+    public User createNewUser(GoogleSignInAccount a) {
+        return new User(a.getId(),a.getEmail(),a.getDisplayName());
+    }
+
+    public void setStatusBar() {
+        Window window = this.getWindow();
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(getResources().getColor(R.color.blue4));
     }
 }

@@ -9,14 +9,13 @@
     android:orientation="horizontal">
 
     <TextView
-        android:id="@+id/actionbar_profile_title"
+        android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/product_sans_r"
-        android:text="Profile Settings"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        android:letterSpacing="0.05"
-        android:textStyle="bold" />
-
+        android:layout_weight="1"
+        android:fontFamily="@font/product_sans_b"
+        android:paddingStart="16dp"
+        android:text="Detail Laporan"
+        android:textColor="@color/white"
+        android:textSize="18sp" />
 </LinearLayout>

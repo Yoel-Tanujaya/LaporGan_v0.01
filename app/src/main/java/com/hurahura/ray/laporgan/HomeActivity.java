@@ -1,65 +1,41 @@
 package com.hurahura.ray.laporgan;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.RadioButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.getbase.floatingactionbutton.FloatingActionButton;
-import com.getbase.floatingactionbutton.FloatingActionsMenu;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.wonderkiln.camerakit.CameraKit;
 import com.wonderkiln.camerakit.CameraKitEventCallback;
 import com.wonderkiln.camerakit.CameraKitImage;
 import com.wonderkiln.camerakit.CameraView;
 
-import org.w3c.dom.ProcessingInstruction;
-
 import java.io.IOException;
-import java.lang.ref.PhantomReference;
 import java.util.List;
 import java.util.Locale;
 
@@ -90,12 +66,13 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     private View cameraViewHolder;
 
     //0 = lapor, 1 = sampah
-    private int jenisLaporan = 0;
-    private int mShortAnimationDuration = 5;
-
-    public User user;
+    public static int JENIS_LAPORAN = 0;
 
     private long captureStartTime;
+
+    public static User USER;
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -112,6 +89,8 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         setToolbar();
         setStatusBarColor();
 
+        USER = new User(MainActivity.USER.getId(),MainActivity.USER.getEmail(),"Test");
+
         ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
 
         mLocationListener = new LocationListener() {
@@ -119,7 +98,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onLocationChanged(Location location) {
                 mMap.setMyLocationEnabled(true);
                 currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 17));
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
             }
 
             @Override
@@ -143,13 +122,15 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000,
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000,
                     10, mLocationListener);
         }
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        Toasty.info(getApplicationContext(),USER.getName()+"; "+USER.getEmail());
 
         fab_home = findViewById(R.id.fab_home);
         btnSubmit = findViewById(R.id.btnSubmit);
@@ -163,7 +144,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         cameraViewHolder = findViewById(R.id.cameraViewHolder);
         tvLocation = findViewById(R.id.tvLocation);
 
-
+        cameraView.stop();
 
         fab_home.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -194,13 +175,13 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         btnJenisLaporan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (jenisLaporan==0) {
-                    jenisLaporan=1;
+                if (JENIS_LAPORAN==0) {
+                    JENIS_LAPORAN=1;
                     btnJenisLaporan.setBackground(getDrawable(R.drawable.ic_sampah));
                     tvJenisLaporan.setText("JEMPUT SAMPAH");
                 }
                 else {
-                    jenisLaporan=0;
+                    JENIS_LAPORAN=0;
                     btnJenisLaporan.setBackground(getDrawable(R.drawable.ic_lapor));
                     tvJenisLaporan.setText("LAPOR KELUHAN");
                 }
@@ -212,22 +193,23 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 cameraViewHolder.setVisibility(View.GONE);
                 tvFab.setVisibility(View.VISIBLE);
                 fab_home.setVisibility(View.VISIBLE);
+                cameraView.stop();
+            }
+        });
+        btnCapture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                captureStartTime = System.currentTimeMillis();
+                captureImage();
             }
         });
     }
 
-    private View.OnClickListener captureClick = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            captureStartTime = System.currentTimeMillis();
-            cameraView.captureImage(new CameraKitEventCallback<CameraKitImage>() {
-                @Override
-                public void callback(CameraKitImage image) {
-
-                }
-            });
-        }
-    };
+    @Override
+    protected void onStart() {
+        super.onStart();
+        cameraView.stop();
+    }
 
     private void closeOnClick() {
         btnSubmit.setVisibility(View.INVISIBLE);
@@ -240,10 +222,14 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_logout:
+                cameraView.stop();
                 logout();
                 break;
             case R.id.action_profile:
-                startActivity(new Intent(getBaseContext(), ProfileActivity.class));
+                cameraView.stop();
+                Intent intent = new Intent(getBaseContext(), ProfileActivity.class);
+                intent.putExtra(ProfileActivity.class.getName(),USER);
+                startActivity(intent);
                 break;
         }
 
@@ -254,7 +240,6 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         View toolbarView = getLayoutInflater().inflate(R.layout.actionbar_home, null, false);
         TextView titleView = toolbarView.findViewById(R.id.toolbar_title);
         titleView.setText("Lapor Gan");
-
         getSupportActionBar().setCustomView(toolbarView, new ActionBar.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -270,12 +255,8 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void startLapor() {
         fab_home.setVisibility(View.INVISIBLE);
         tvFab.setVisibility(View.INVISIBLE);
-        cameraViewHolder.setAlpha(0f);
         cameraViewHolder.setVisibility(View.VISIBLE);
-        cameraViewHolder.animate()
-                .alpha(1f)
-                .setDuration(10)
-                .setListener(null);
+        cameraView.start();
         cameraView.setMethod(CameraKit.Constants.METHOD_STANDARD);
         cameraView.setFlash(0);
     }
@@ -318,7 +299,10 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onPause() {
         super.onPause();
+        cameraViewHolder.setVisibility(View.GONE);
         cameraView.stop();
+        tvFab.setVisibility(View.VISIBLE);
+        fab_home.setVisibility(View.VISIBLE);
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -334,8 +318,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                     if (gpsTracker.canGetLocation) {
                         currentLocation = new LatLng(gpsTracker.getLatitude(), gpsTracker.getLongitude());
                     } else {
-                        // permission denied, boo! Disable the
-                        // functionality that depends on this permission.
+
                     }
                     return;
                 }
@@ -352,9 +335,31 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         startActivity(new Intent(HomeActivity.this,MainActivity.class));
+                        USER = new User();
                         finish();
                     }
                 });
+    }
+
+    public void captureImage() {
+
+        cameraView.captureImage(new CameraKitEventCallback<CameraKitImage>() {
+            @Override
+            public void callback(CameraKitImage event) {
+                byte[] jpeg = event.getJpeg();
+
+                long callbackTime = System.currentTimeMillis();
+                ResultHolder.dispose();
+                ResultHolder.setImage(jpeg);
+                ResultHolder.setNativeCaptureSize(cameraView.getCaptureSize());
+                ResultHolder.setTimeToCallback(callbackTime - captureStartTime);
+                Intent intent = new Intent(getApplicationContext(), PreviewActivity.class);
+                intent.putExtra(PreviewActivity.class.getName(),USER);
+                PreviewActivity.LOCATION = tvLocation.getText().toString();
+                PreviewActivity.JENIS_LAPORAN = tvJenisLaporan.getText().toString();
+                getApplicationContext().startActivity(intent);
+            }
+        });
     }
 
 }

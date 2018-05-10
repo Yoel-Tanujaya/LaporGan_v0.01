@@ -1,9 +1,19 @@
 package com.hurahura.ray.laporgan;
 
-public class User {
+import java.io.Serializable;
+
+public class User implements Serializable{
     private String id;
     private String email;
     private String name;
+    private String phone = "";
+
+    User() {
+        this.id = "";
+        this.email = "";
+        this.name = "";
+        this.phone = "";
+    }
 
     User(String i, String e, String n) {
         this.id = i;
@@ -33,5 +43,13 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }
