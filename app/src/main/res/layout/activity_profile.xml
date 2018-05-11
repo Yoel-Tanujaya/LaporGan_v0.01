@@ -223,23 +223,4 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnDeleteAccount" />
 
-    <Button
-        android:id="@+id/btnSaveProfile"
-        android:layout_width="72dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="20dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/button_change_account"
-        android:fontFamily="@font/product_sans_b"
-        android:text="SAVE"
-        android:textColor="@color/blue4"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/textView3"
-        app:layout_constraintTop_toTopOf="parent" />
-
 </android.support.constraint.ConstraintLayout>

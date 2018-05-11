@@ -70,9 +70,8 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private long captureStartTime;
 
-    public static User USER;
-
-
+    public static String KEY;
+    public static String IMG_PATH;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -89,7 +88,8 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         setToolbar();
         setStatusBarColor();
 
-        USER = new User(MainActivity.USER.getId(),MainActivity.USER.getEmail(),"Test");
+        KEY = getIntent().getStringExtra("KEY");
+        IMG_PATH = getIntent().getStringExtra("IMG_PATH");
 
         ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
 
@@ -129,8 +129,6 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        Toasty.info(getApplicationContext(),USER.getName()+"; "+USER.getEmail());
 
         fab_home = findViewById(R.id.fab_home);
         btnSubmit = findViewById(R.id.btnSubmit);
@@ -205,12 +203,6 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        cameraView.stop();
-    }
-
     private void closeOnClick() {
         btnSubmit.setVisibility(View.INVISIBLE);
         findViewById(R.id.fab_text).setVisibility(View.VISIBLE);
@@ -227,8 +219,9 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
             case R.id.action_profile:
                 cameraView.stop();
-                Intent intent = new Intent(getBaseContext(), ProfileActivity.class);
-                intent.putExtra(ProfileActivity.class.getName(),USER);
+                Intent intent = new Intent(getBaseContext(),ProfileActivity.class);
+                intent.putExtra("KEY",KEY);
+                intent.putExtra("imgPath",IMG_PATH);
                 startActivity(intent);
                 break;
         }
@@ -335,7 +328,6 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         startActivity(new Intent(HomeActivity.this,MainActivity.class));
-                        USER = new User();
                         finish();
                     }
                 });
@@ -354,7 +346,6 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 ResultHolder.setNativeCaptureSize(cameraView.getCaptureSize());
                 ResultHolder.setTimeToCallback(callbackTime - captureStartTime);
                 Intent intent = new Intent(getApplicationContext(), PreviewActivity.class);
-                intent.putExtra(PreviewActivity.class.getName(),USER);
                 PreviewActivity.LOCATION = tvLocation.getText().toString();
                 PreviewActivity.JENIS_LAPORAN = tvJenisLaporan.getText().toString();
                 getApplicationContext().startActivity(intent);

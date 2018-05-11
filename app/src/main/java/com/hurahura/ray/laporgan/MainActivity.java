@@ -33,6 +33,14 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.List;
 
 import es.dmoral.toasty.Toasty;
 
@@ -64,6 +72,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvName;
     private TextView tvSeparator;
 
+    private DatabaseReference dbUser;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,10 +88,13 @@ public class MainActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
+        //get FirebaseDatabase reference
+        dbUser = FirebaseDatabase.getInstance().getReference("user");
 
         if (currentUser!=null) {
-            USER = new User(currentUser.getUid(),currentUser.getEmail(),currentUser.getDisplayName());
-            startActivity(new Intent(this,HomeActivity.class));
+            Intent intent = new Intent(getBaseContext(),HomeActivity.class);
+            intent.putExtra("KEY",currentUser.getUid());
+            startActivity(intent);
             finish();
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
@@ -169,6 +182,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //Sign in using Google Sign-In
     private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
         Log.d(TAG,"firebaseAuthWithGoogle: " + account.getId());
         AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(),null);
@@ -180,8 +194,10 @@ public class MainActivity extends AppCompatActivity {
                             Log.d(TAG,"signInWithCredential:success");
                             FirebaseUser users = mAuth.getCurrentUser();
                             USER = new User(users.getUid(),users.getEmail(),users.getDisplayName());
+                            addUserToDatabase();
                             Intent intent = new Intent(getBaseContext(),HomeActivity.class);
-                            intent.putExtra(HomeActivity.class.getName(),USER);
+                            intent.putExtra("KEY",users.getUid());
+                            intent.putExtra("IMG_PATH",USER.getImage());
                             startActivity(intent);
                             finish();
                         }
@@ -193,6 +209,7 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    //Register using email address
     public void createAccount(String email, String password) {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -203,8 +220,9 @@ public class MainActivity extends AppCompatActivity {
                             Log.d(TAG, "createUserWithEmail:success");
                             FirebaseUser users = mAuth.getCurrentUser();
                             USER = new User(users.getUid(),users.getEmail(),txtName.getText().toString());
+                            addUserToDatabase();
                             Intent intent = new Intent(getBaseContext(),HomeActivity.class);
-                            intent.putExtra(HomeActivity.class.getName(),USER);
+                            intent.putExtra(HomeActivity.class.getName(),users.getUid());
                             startActivity(intent);
                             finish();
                         } else {
@@ -217,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    //Sign-in using email address
     public void signInEmail(String email, String password) {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -227,11 +246,11 @@ public class MainActivity extends AppCompatActivity {
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser users = mAuth.getCurrentUser();
                             USER = new User(users.getUid(),users.getEmail(),users.getDisplayName());
-                            Intent intent = new Intent(getBaseContext(),HomeActivity.class);
-                            intent.putExtra(HomeActivity.class.getName(),USER);
-                            startActivity(intent);
                             Toasty.success(getApplicationContext(),"Login Success",4,true).show();
-                            startActivity(new Intent(getBaseContext(), HomeActivity.class));
+                            Intent intent = new Intent(getBaseContext(),HomeActivity.class);
+                            intent.putExtra(HomeActivity.class.getName(),users.getUid());
+                            intent.putExtra("IMG_PATH",USER.getImage());
+                            startActivity(intent);
                             finish();
                         } else {
                             // If sign in fails, display a message to the user.
@@ -292,14 +311,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public User createNewUser(GoogleSignInAccount a) {
-        return new User(a.getId(),a.getEmail(),a.getDisplayName());
-    }
-
     public void setStatusBar() {
         Window window = this.getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(getResources().getColor(R.color.blue4));
+    }
+
+    public void addUserToDatabase() {
+        final String name;
+        if (USER.getName()==null) {
+            name = txtName.getText().toString();
+        }
+        else {
+            name = USER.getName();
+        }
+        dbUser.child(USER.getId());
+        dbUser.child(USER.getId()).child("name").setValue(name);
+        dbUser.child(USER.getId()).child("email").setValue(USER.getEmail());
+        dbUser.child(USER.getId()).child("phone").setValue("");
+        dbUser.child(USER.getId()).child("image").setValue("");
     }
 }

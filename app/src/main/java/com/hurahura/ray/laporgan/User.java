@@ -7,6 +7,7 @@ public class User implements Serializable{
     private String email;
     private String name;
     private String phone = "";
+    private String image;
 
     User() {
         this.id = "";
@@ -51,5 +52,13 @@ public class User implements Serializable{
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 }
