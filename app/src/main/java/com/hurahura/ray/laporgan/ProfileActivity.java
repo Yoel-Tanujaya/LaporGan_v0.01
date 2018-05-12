@@ -270,7 +270,7 @@ public class ProfileActivity extends AppCompatActivity {
                     imgProfile.setImageDrawable(getDrawable(R.drawable.img_empty_profile));
                 }
                 else {
-                    Picasso.get().load(Uri.parse(map.get("image"))).into(imgProfile);
+                    Picasso.get().load(Uri.parse(map.get("image"))).noFade().into(imgProfile);
                 }
             }
 

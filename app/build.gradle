@@ -40,6 +40,9 @@ dependencies {
     implementation 'id.zelory:compressor:2.1.0'
     implementation 'com.github.esafirm.android-image-picker:imagepicker:1.12.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation ('com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.11.0@aar'){
+        transitive=true
+    }
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'

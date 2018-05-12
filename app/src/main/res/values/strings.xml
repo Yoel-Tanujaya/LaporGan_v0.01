@@ -21,4 +21,5 @@
     <string name="history">History</string>
     <string name="kirim">Kirim Laporan</string>
     <string name="default_description">Tekan untuk tambah deskripsi laporan</string>
+    <string name="test_sentences">"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."</string>
 </resources>
