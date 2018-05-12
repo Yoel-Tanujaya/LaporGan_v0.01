@@ -86,7 +86,7 @@
         android:paddingBottom="8dp"
         android:paddingEnd="16dp"
         android:paddingStart="16dp"
-        android:text="Tekan untuk tambah deskripsi laporan"
+        android:text="@string/default_description"
         android:textColor="@color/white"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"

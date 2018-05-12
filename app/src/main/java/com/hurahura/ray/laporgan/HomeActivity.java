@@ -221,7 +221,6 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 cameraView.stop();
                 Intent intent = new Intent(getBaseContext(),ProfileActivity.class);
                 intent.putExtra("KEY",KEY);
-                intent.putExtra("imgPath",IMG_PATH);
                 startActivity(intent);
                 break;
         }
@@ -322,7 +321,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void logout() {
-        MainActivity.mAuth.signOut();
+        MainActivity.signOut();
         MainActivity.mGoogleSignInClient.signOut().addOnCompleteListener(this,
                 new OnCompleteListener<Void>() {
                     @Override
@@ -334,12 +333,11 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void captureImage() {
-
         cameraView.captureImage(new CameraKitEventCallback<CameraKitImage>() {
             @Override
             public void callback(CameraKitImage event) {
                 byte[] jpeg = event.getJpeg();
-
+                String[] loc = currentLocation.toString().split(",");
                 long callbackTime = System.currentTimeMillis();
                 ResultHolder.dispose();
                 ResultHolder.setImage(jpeg);
@@ -348,6 +346,9 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Intent intent = new Intent(getApplicationContext(), PreviewActivity.class);
                 PreviewActivity.LOCATION = tvLocation.getText().toString();
                 PreviewActivity.JENIS_LAPORAN = tvJenisLaporan.getText().toString();
+                intent.putExtra("KEY",KEY);
+                intent.putExtra("LOC_LAT",currentLocation.latitude);
+                intent.putExtra("LOC_LNG",currentLocation.longitude);
                 getApplicationContext().startActivity(intent);
             }
         });

@@ -82,7 +82,6 @@
             android:fontFamily="@font/product_sans_b"
             android:gravity="center_vertical"
             android:paddingLeft="16dp"
-            android:text="Yoel Tanujaya"
             android:textAllCaps="false"
             android:textColor="@color/black"
             android:textSize="16sp" />
@@ -148,7 +147,6 @@
             android:fontFamily="@font/product_sans_b"
             android:gravity="center_vertical"
             android:paddingLeft="16dp"
-            android:text="yoeltan77@gmail.com"
             android:textAllCaps="false"
             android:textColor="@color/black"
             android:textSize="16sp" />

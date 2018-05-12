@@ -20,4 +20,5 @@
     <string name="sampah">Jemput Sampah</string>
     <string name="history">History</string>
     <string name="kirim">Kirim Laporan</string>
+    <string name="default_description">Tekan untuk tambah deskripsi laporan</string>
 </resources>

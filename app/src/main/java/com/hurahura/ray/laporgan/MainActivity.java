@@ -38,9 +38,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
 
@@ -56,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
     public static GoogleSignInClient mGoogleSignInClient;
 
     public static User USER;
+
+    private String imgPath;
 
     private EditText txtEmail;
     private EditText txtPass;
@@ -92,8 +96,10 @@ public class MainActivity extends AppCompatActivity {
         dbUser = FirebaseDatabase.getInstance().getReference("user");
 
         if (currentUser!=null) {
+            getImageFromDatabase(currentUser.getUid());
             Intent intent = new Intent(getBaseContext(),HomeActivity.class);
             intent.putExtra("KEY",currentUser.getUid());
+            intent.putExtra("IMG_PATH",imgPath);
             startActivity(intent);
             finish();
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -261,6 +267,10 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    public static void signOut() {
+        FirebaseAuth.getInstance().signOut();
+    }
+
     public void registerValidation(String email, String pass, String name) {
         if (!email.isEmpty()&&!pass.isEmpty()&&!name.isEmpty()&&email.matches(Patterns.EMAIL_ADDRESS.pattern())&&pass.matches(PASSWORD_PATTERN)) {
             createAccount(email,pass);
@@ -331,5 +341,20 @@ public class MainActivity extends AppCompatActivity {
         dbUser.child(USER.getId()).child("email").setValue(USER.getEmail());
         dbUser.child(USER.getId()).child("phone").setValue("");
         dbUser.child(USER.getId()).child("image").setValue("");
+    }
+
+    public void getImageFromDatabase(final String uid) {
+        dbUser.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Map<String, String> map = (Map<String, String>) dataSnapshot.getValue();
+                imgPath = map.get("image");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 }

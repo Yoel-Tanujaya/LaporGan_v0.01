@@ -1,16 +1,11 @@
 package com.hurahura.ray.laporgan;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.util.Patterns;
@@ -23,10 +18,11 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.esafirm.imagepicker.features.ImagePicker;
-import com.esafirm.imagepicker.features.ReturnMode;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthCredential;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -35,6 +31,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.util.Map;
@@ -66,8 +63,6 @@ public class ProfileActivity extends AppCompatActivity {
     private Context context;
 
     public static String KEY;
-    public static String imgPath;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,8 +74,8 @@ public class ProfileActivity extends AppCompatActivity {
         context = this;
 
         KEY = getIntent().getStringExtra("KEY");
-        imgPath = getIntent().getStringExtra("IMG_PATH");
-        getDataFromDatabase();
+
+        imgProfile = findViewById(R.id.imgProfile);
 
         //get FirebaseDatabase reference
         dbUser = FirebaseDatabase.getInstance().getReference("user").child(KEY);
@@ -95,17 +90,7 @@ public class ProfileActivity extends AppCompatActivity {
         btnChangePassword = findViewById(R.id.btnChangePassword);
         btnDeleteAccount = findViewById(R.id.btnDeleteAccount);
 
-        imgProfile = findViewById(R.id.imgProfile);
-
-        Toasty.info(this, imgPath, 3).show();
-
-        ;
-
-        if (imgPath == null) {
-            imgProfile.setImageDrawable(getDrawable(R.drawable.img_empty_profile));
-        } else {
-            imgProfile.setImageURI(Uri.parse(imgPath));
-        }
+        getDataFromDatabase();
 
         tvFullName.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -131,7 +116,7 @@ public class ProfileActivity extends AppCompatActivity {
         btnChangePassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                changePasswordStepOne();
+                changePassword();
             }
         });
 
@@ -139,16 +124,14 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 showImagePicker();
-                getDataFromDatabase();
             }
         });
-    }
-
-    @Override
-    protected void onResume() {
-        getDataFromDatabase();
-        Toasty.info(this, imgPath, 3).show();
-        super.onResume();
+        btnDeleteAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteAccount();
+            }
+        });
     }
 
     @Override
@@ -156,7 +139,6 @@ public class ProfileActivity extends AppCompatActivity {
         if (ImagePicker.shouldHandle(requestCode, resultCode, data) || requestCode == RC_IMAGE_PICKER) {
             image = ImagePicker.getFirstImageOrNull(data);
             uploadImageProfile(image);
-            dbUser.child("image").setValue(imgPath);
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -211,39 +193,70 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
-    public void changePasswordStepOne() { //parameter yang dipake nanti => object user yang login saat itu, supaya bisa dapat credential user tsb
-        new MaterialDialog.Builder(this)
-                .title("Enter Your Current Password")
-                .inputType(InputType.TYPE_TEXT_VARIATION_PASSWORD)
-                .input("Current password", "", false, new MaterialDialog.InputCallback() {
-                    @Override
-                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-                        if (input.toString().equals("abc123")) {
-                            changePasswordStepTwo();
-                        } else {
-                            Toasty.error(getApplicationContext(), "Password incorrect", 2, true).show();
-                        }
-                    }
-                }).show();
+    public void changePassword() {
+        MainActivity.mAuth.sendPasswordResetEmail(tvUserEmail.getText().toString()).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Toasty.success(getApplicationContext(),"Password reset email has been sent. Please check your inbox",4,true).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toasty.error(getApplicationContext(),"Error sending password reset email. Please try again",4,true).show();
+            }
+        });
     }
 
-    public void changePasswordStepTwo() {
-        new MaterialDialog.Builder(this)
-                .title("Enter New Password")
-                .content("Min. 6 alphanumeric chars, at least 1 Uppercase, 1 Number. Special characters is allowed")
-                .inputType(InputType.TYPE_TEXT_VARIATION_PASSWORD)
-                .input("New Password", "", false, new MaterialDialog.InputCallback() {
-                    @Override
-                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-                        if (input.toString().matches(PASSWORD_PATTERN)) {
-                            Toasty.success(getApplicationContext(), "Password successfully changed", 4, true).show();
-                            //masuk ke Firebase Auth untuk update password
-                        } else {
-                            Toasty.error(getApplicationContext(), "Password invalid", 2, true).show();
-                        }
-                    }
-                }).show();
+    public void deleteAccount() {
+        FirebaseUser user = MainActivity.mAuth.getCurrentUser();
+        user.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Toasty.success(getApplicationContext(),"Account successfully removed",4,true).show();
+                startActivity(new Intent(getBaseContext(),MainActivity.class));
+                finish();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toasty.error(getApplicationContext(),"Error deleting account",4,true).show();
+            }
+        });
     }
+
+//    public void changePasswordStepOne() { //parameter yang dipake nanti => object user yang login saat itu, supaya bisa dapat credential user tsb
+//        new MaterialDialog.Builder(this)
+//                .title("Enter Your Current Password")
+//                .inputType(InputType.TYPE_TEXT_VARIATION_PASSWORD)
+//                .input("Current password", "", false, new MaterialDialog.InputCallback() {
+//                    @Override
+//                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
+//                        if (input.toString().equals("abc123")) {
+//                            changePasswordStepTwo();
+//                        } else {
+//                            Toasty.error(getApplicationContext(), "Password incorrect", 2, true).show();
+//                        }
+//                    }
+//                }).show();
+//    }
+//
+//    public void changePasswordStepTwo() {
+//        new MaterialDialog.Builder(this)
+//                .title("Enter New Password")
+//                .content("Min. 6 alphanumeric chars, at least 1 Uppercase, 1 Number. Special characters is allowed")
+//                .inputType(InputType.TYPE_TEXT_VARIATION_PASSWORD)
+//                .input("New Password", "", false, new MaterialDialog.InputCallback() {
+//                    @Override
+//                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
+//                        if (input.toString().matches(PASSWORD_PATTERN)) {
+//                            Toasty.success(getApplicationContext(), "Password successfully changed", 4, true).show();
+//                            //masuk ke Firebase Auth untuk update password
+//                        } else {
+//                            Toasty.error(getApplicationContext(), "Password invalid", 2, true).show();
+//                        }
+//                    }
+//                }).show();
+//    }
 
     public void getDataFromDatabase() {
         dbUser.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -253,7 +266,12 @@ public class ProfileActivity extends AppCompatActivity {
                 tvFullName.setText(map.get("name"));
                 tvPhone.setText(map.get("phone"));
                 tvUserEmail.setText(map.get("email"));
-                imgPath = map.get("image");
+                if (map.get("image")==null||map.get("image")=="") {
+                    imgProfile.setImageDrawable(getDrawable(R.drawable.img_empty_profile));
+                }
+                else {
+                    Picasso.get().load(Uri.parse(map.get("image"))).into(imgProfile);
+                }
             }
 
             @Override
@@ -290,9 +308,7 @@ public class ProfileActivity extends AppCompatActivity {
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                dbUser.child("image").setValue(file.getLastPathSegment());
-                imgProfile.setImageURI(file);
-                getDataFromDatabase();
+                dbUser.child("image").setValue(taskSnapshot.getDownloadUrl().toString());
                 Toasty.success(context, "Upload success", 4, true).show();
             }
         });
