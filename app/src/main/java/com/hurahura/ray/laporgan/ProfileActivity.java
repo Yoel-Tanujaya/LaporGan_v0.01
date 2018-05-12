@@ -193,6 +193,8 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
+    //change password tambah autentikasi ulang -> isi password dulu di dialog, baru kirim email reset
+    //langsung logout -> balik ke MainActivity -> KEY di delete semua
     public void changePassword() {
         MainActivity.mAuth.sendPasswordResetEmail(tvUserEmail.getText().toString()).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -207,6 +209,9 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
+    //delete account autentikasi ulang dulu -> isi password, terus kasi dialog apakah yakin mau delete
+    //kalo ya -> Delete akun dari FirebaseAuth -> Delete data user dari DB -> delete static KEY di HomeAct sebelum intent -> delete KEY di MainActivity
+    //optional -> hapus semua laporan yang berasal dari user yang didelete
     public void deleteAccount() {
         FirebaseUser user = MainActivity.mAuth.getCurrentUser();
         user.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -224,40 +229,6 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
-//    public void changePasswordStepOne() { //parameter yang dipake nanti => object user yang login saat itu, supaya bisa dapat credential user tsb
-//        new MaterialDialog.Builder(this)
-//                .title("Enter Your Current Password")
-//                .inputType(InputType.TYPE_TEXT_VARIATION_PASSWORD)
-//                .input("Current password", "", false, new MaterialDialog.InputCallback() {
-//                    @Override
-//                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-//                        if (input.toString().equals("abc123")) {
-//                            changePasswordStepTwo();
-//                        } else {
-//                            Toasty.error(getApplicationContext(), "Password incorrect", 2, true).show();
-//                        }
-//                    }
-//                }).show();
-//    }
-//
-//    public void changePasswordStepTwo() {
-//        new MaterialDialog.Builder(this)
-//                .title("Enter New Password")
-//                .content("Min. 6 alphanumeric chars, at least 1 Uppercase, 1 Number. Special characters is allowed")
-//                .inputType(InputType.TYPE_TEXT_VARIATION_PASSWORD)
-//                .input("New Password", "", false, new MaterialDialog.InputCallback() {
-//                    @Override
-//                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-//                        if (input.toString().matches(PASSWORD_PATTERN)) {
-//                            Toasty.success(getApplicationContext(), "Password successfully changed", 4, true).show();
-//                            //masuk ke Firebase Auth untuk update password
-//                        } else {
-//                            Toasty.error(getApplicationContext(), "Password invalid", 2, true).show();
-//                        }
-//                    }
-//                }).show();
-//    }
-
     public void getDataFromDatabase() {
         dbUser.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -266,12 +237,8 @@ public class ProfileActivity extends AppCompatActivity {
                 tvFullName.setText(map.get("name"));
                 tvPhone.setText(map.get("phone"));
                 tvUserEmail.setText(map.get("email"));
-                if (map.get("image")==null||map.get("image")=="") {
-                    imgProfile.setImageDrawable(getDrawable(R.drawable.img_empty_profile));
-                }
-                else {
-                    Picasso.get().load(Uri.parse(map.get("image"))).noFade().into(imgProfile);
-                }
+                Picasso.get().load(Uri.parse(map.get("image"))).noFade().placeholder(getDrawable(R.drawable.img_empty_profile)).into(imgProfile);
+
             }
 
             @Override

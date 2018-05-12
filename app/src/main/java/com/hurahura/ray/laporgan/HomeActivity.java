@@ -223,6 +223,8 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 intent.putExtra("KEY",KEY);
                 startActivity(intent);
                 break;
+            case R.id.action_history:
+                startActivity(new Intent(getBaseContext(),HistoryActivity.class));
         }
 
         return super.onOptionsItemSelected(item);

@@ -16,6 +16,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -76,6 +77,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvName;
     private TextView tvSeparator;
 
+    private ImageView imgLogo;
+
     private DatabaseReference dbUser;
 
     @Override
@@ -125,6 +128,8 @@ public class MainActivity extends AppCompatActivity {
             btnForgotPass = (Button) findViewById(R.id.btnForgotPass);
             btnBackToLogin = (Button) findViewById(R.id.btnBackToLogin);
 
+            imgLogo = findViewById(R.id.imgLogo);
+
             //GSO object for Firebase Authentication
             GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestIdToken(getString(R.string.default_web_client_id))
@@ -169,6 +174,14 @@ public class MainActivity extends AppCompatActivity {
                     String pass = txtPass.getText().toString();
                     String name = txtName.getText().toString();
                     registerValidation(email,pass,name);
+                }
+            });
+
+            imgLogo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startActivity(new Intent(getBaseContext(),AdminActivity.class));
+                    finish();
                 }
             });
         }
