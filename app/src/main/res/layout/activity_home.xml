@@ -108,7 +108,7 @@
             fab:layout_constraintStart_toStartOf="parent" />
 
         <TextView
-            android:id="@+id/tvJenisLaporan"
+            android:id="@+id/tvJenisLaporanHistory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"

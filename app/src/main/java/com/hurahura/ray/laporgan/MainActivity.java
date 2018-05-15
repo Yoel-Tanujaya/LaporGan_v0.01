@@ -1,14 +1,10 @@
 package com.hurahura.ray.laporgan;
 
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
@@ -25,8 +21,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.internal.Objects;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -39,10 +33,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
@@ -101,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         if (currentUser!=null) {
             getImageFromDatabase(currentUser.getUid());
             Intent intent = new Intent(getBaseContext(),HomeActivity.class);
-            intent.putExtra("KEY",currentUser.getUid());
+            HomeActivity.KEY = currentUser.getUid();
             intent.putExtra("IMG_PATH",imgPath);
             startActivity(intent);
             finish();
@@ -117,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
             txtName = (EditText) findViewById(R.id.txtName);
 
             //---------------------------------------------TextView------------------------------------------
-            tvName = (TextView) findViewById(R.id.tvName);
+            tvName = (TextView) findViewById(R.id.tvNameHistory);
             tvSeparator = (TextView) findViewById(R.id.tvSeparator);
 
             //---------------------------------------------Button------------------------------------------
@@ -215,8 +206,8 @@ public class MainActivity extends AppCompatActivity {
                             USER = new User(users.getUid(),users.getEmail(),users.getDisplayName());
                             addUserToDatabase();
                             Intent intent = new Intent(getBaseContext(),HomeActivity.class);
-                            intent.putExtra("KEY",users.getUid());
                             intent.putExtra("IMG_PATH",USER.getImage());
+                            HomeActivity.KEY = USER.getId();
                             startActivity(intent);
                             finish();
                         }
@@ -241,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
                             USER = new User(users.getUid(),users.getEmail(),txtName.getText().toString());
                             addUserToDatabase();
                             Intent intent = new Intent(getBaseContext(),HomeActivity.class);
-                            intent.putExtra(HomeActivity.class.getName(),users.getUid());
+                            HomeActivity.KEY = USER.getId();
                             startActivity(intent);
                             finish();
                         } else {
@@ -265,9 +256,9 @@ public class MainActivity extends AppCompatActivity {
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser users = mAuth.getCurrentUser();
                             USER = new User(users.getUid(),users.getEmail(),users.getDisplayName());
+                            HomeActivity.KEY = USER.getId();
                             Toasty.success(getApplicationContext(),"Login Success",4,true).show();
                             Intent intent = new Intent(getBaseContext(),HomeActivity.class);
-                            intent.putExtra(HomeActivity.class.getName(),users.getUid());
                             intent.putExtra("IMG_PATH",USER.getImage());
                             startActivity(intent);
                             finish();
@@ -342,18 +333,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void addUserToDatabase() {
-        final String name;
-        if (USER.getName()==null) {
-            name = txtName.getText().toString();
-        }
-        else {
-            name = USER.getName();
-        }
-        dbUser.child(USER.getId());
-        dbUser.child(USER.getId()).child("name").setValue(name);
-        dbUser.child(USER.getId()).child("email").setValue(USER.getEmail());
-        dbUser.child(USER.getId()).child("phone").setValue("");
-        dbUser.child(USER.getId()).child("image").setValue("");
+        dbUser.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.hasChild(USER.getId())) {
+                    Toasty.success(getApplicationContext(),"Welcome back, "+USER.getName(),4).show();
+                }
+                else {
+                    final String name;
+                    if (USER.getName()==null) {
+                        name = txtName.getText().toString();
+                    }
+                    else {
+                        name = USER.getName();
+                    }
+                    dbUser.child(USER.getId());
+                    dbUser.child(USER.getId()).child("name").setValue(name);
+                    dbUser.child(USER.getId()).child("email").setValue(USER.getEmail());
+                    dbUser.child(USER.getId()).child("phone").setValue("");
+                    dbUser.child(USER.getId()).child("image").setValue("");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
     }
 
     public void getImageFromDatabase(final String uid) {

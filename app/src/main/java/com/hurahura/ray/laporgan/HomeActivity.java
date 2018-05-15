@@ -39,8 +39,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-import es.dmoral.toasty.Toasty;
-
 public class HomeActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     Geocoder geocoder;
@@ -88,7 +86,6 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         setToolbar();
         setStatusBarColor();
 
-        KEY = getIntent().getStringExtra("KEY");
         IMG_PATH = getIntent().getStringExtra("IMG_PATH");
 
         ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -137,12 +134,10 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         btnCapture = findViewById(R.id.btnCapture);
         btnFlash = findViewById(R.id.btnFlash);
         btnJenisLaporan = findViewById(R.id.btnJenisLaporan);
-        tvJenisLaporan = findViewById(R.id.tvJenisLaporan);
+        tvJenisLaporan = findViewById(R.id.tvJenisLaporanHistory);
         tvFab = findViewById(R.id.fab_text);
         cameraViewHolder = findViewById(R.id.cameraViewHolder);
         tvLocation = findViewById(R.id.tvLocation);
-
-        cameraView.stop();
 
         fab_home.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -219,11 +214,11 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
             case R.id.action_profile:
                 cameraView.stop();
-                Intent intent = new Intent(getBaseContext(),ProfileActivity.class);
-                intent.putExtra("KEY",KEY);
-                startActivity(intent);
+                ProfileActivity.KEY = KEY;
+                startActivity(new Intent(getBaseContext(),ProfileActivity.class));
                 break;
             case R.id.action_history:
+                HistoryActivity.KEY = KEY;
                 startActivity(new Intent(getBaseContext(),HistoryActivity.class));
         }
 
@@ -250,7 +245,6 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         fab_home.setVisibility(View.INVISIBLE);
         tvFab.setVisibility(View.INVISIBLE);
         cameraViewHolder.setVisibility(View.VISIBLE);
-        cameraView.start();
         cameraView.setMethod(CameraKit.Constants.METHOD_STANDARD);
         cameraView.setFlash(0);
     }

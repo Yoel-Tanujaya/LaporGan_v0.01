@@ -27,6 +27,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -72,8 +73,6 @@ public class ProfileActivity extends AppCompatActivity {
         setStatusBarColor();
 
         context = this;
-
-        KEY = getIntent().getStringExtra("KEY");
 
         imgProfile = findViewById(R.id.imgProfile);
 
@@ -234,11 +233,10 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Map<String, String> map = (Map<String, String>) dataSnapshot.getValue();
+                Picasso.get().load(Uri.parse(map.get("image"))).noFade().into(imgProfile);
                 tvFullName.setText(map.get("name"));
                 tvPhone.setText(map.get("phone"));
                 tvUserEmail.setText(map.get("email"));
-                Picasso.get().load(Uri.parse(map.get("image"))).noFade().placeholder(getDrawable(R.drawable.img_empty_profile)).into(imgProfile);
-
             }
 
             @Override
@@ -276,8 +274,11 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 dbUser.child("image").setValue(taskSnapshot.getDownloadUrl().toString());
+                Picasso.get().load(taskSnapshot.getDownloadUrl()).into(imgProfile);
                 Toasty.success(context, "Upload success", 4, true).show();
             }
         });
     }
+
+
 }
