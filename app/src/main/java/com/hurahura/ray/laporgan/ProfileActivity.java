@@ -74,6 +74,8 @@ public class ProfileActivity extends AppCompatActivity {
 
         context = this;
 
+        KEY = HomeActivity.KEY;
+
         imgProfile = findViewById(R.id.imgProfile);
 
         //get FirebaseDatabase reference
@@ -137,7 +139,13 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (ImagePicker.shouldHandle(requestCode, resultCode, data) || requestCode == RC_IMAGE_PICKER) {
             image = ImagePicker.getFirstImageOrNull(data);
-            uploadImageProfile(image);
+            if (image==null) {
+
+            }
+            else {
+                uploadImageProfile(image);
+            }
+
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);

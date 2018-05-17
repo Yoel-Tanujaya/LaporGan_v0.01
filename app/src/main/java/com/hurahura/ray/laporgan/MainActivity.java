@@ -91,10 +91,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (currentUser!=null) {
             getImageFromDatabase(currentUser.getUid());
-            Intent intent = new Intent(getBaseContext(),HomeActivity.class);
             HomeActivity.KEY = currentUser.getUid();
-            intent.putExtra("IMG_PATH",imgPath);
-            startActivity(intent);
+            startActivity(new Intent(getBaseContext(),HomeActivity.class));
             finish();
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
