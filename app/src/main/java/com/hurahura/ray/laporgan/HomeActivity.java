@@ -217,9 +217,9 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 ProfileActivity.KEY = KEY;
                 startActivity(new Intent(getBaseContext(),ProfileActivity.class));
                 break;
-            case R.id.action_history:
-                HistoryActivity.KEY = KEY;
-                startActivity(new Intent(getBaseContext(),HistoryActivity.class));
+//            case R.id.action_history:
+//                HistoryActivity.KEY = KEY;
+//                startActivity(new Intent(getBaseContext(),HistoryActivity.class));
         }
 
         return super.onOptionsItemSelected(item);
@@ -268,7 +268,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        tvLocation.setText(addresses.get(0).getAddressLine(0));
     }
 
     protected void onResume() {
@@ -281,7 +281,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         } catch (IOException e) {
             e.printStackTrace();
         }
-        tvLocation.setText(addresses.get(0).getAddressLine(0));
+        //tvLocation.setText(addresses.get(0).getAddressLine(0));
     }
 
     @Override

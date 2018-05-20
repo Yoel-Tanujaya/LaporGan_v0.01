@@ -1,8 +1,11 @@
 package com.hurahura.ray.laporgan;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -36,6 +40,8 @@ import com.h6ah4i.android.widget.advrecyclerview.swipeable.annotation.SwipeableI
 import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractSwipeableItemViewHolder;
 import com.squareup.picasso.Picasso;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.URI;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
@@ -44,16 +50,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import es.dmoral.toasty.Toasty;
+
 public class HistoryActivity extends AppCompatActivity {
 
-    private DatabaseReference dbReport = FirebaseDatabase.getInstance().getReference("report");
-    private StorageReference imgRef = FirebaseStorage.getInstance().getReference().child("imageReport");
+    private Context mContext;
+
+    private int ct=0;
 
     private Query query;
 
     private RecyclerView recyclerView;
 
+    private List<Posts> listPosts;
+
     public static String KEY;
+
+    private DatabaseReference dbReport = FirebaseDatabase.getInstance().getReference("report");
+    private DatabaseReference dbUser = FirebaseDatabase.getInstance().getReference("user").child(KEY);
+    private StorageReference imgRef = FirebaseStorage.getInstance().getReference().child("imageReport");
+
+    private User user = new User();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,6 +78,9 @@ public class HistoryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_history);
         setTheme(R.style.Theme_AppCompat_DayNight_NoActionBar);
         setStatusBarColor();
+        mContext = this;
+
+        PostsAdapter adapter = new PostsAdapter(listPosts);
 
         recyclerView = findViewById(R.id.recyclerViewHistory);
         query = dbReport.limitToLast(30).orderByChild("time");
@@ -68,9 +88,53 @@ public class HistoryActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(lm);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(adapter);
+
+        getUserData();
+        getReportData();
+        Toasty.success(mContext,String.valueOf(ct),2).show();
         adapter.notifyDataSetChanged();
 
 
+    }
+
+    private void getUserData() {
+        dbUser.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Map<String, String> map = (Map<String, String>) dataSnapshot.getValue();
+                user.setName(map.get("name"));
+                user.setEmail(map.get("email"));
+                user.setPhone(map.get("phone"));
+                user.setImage(map.get("image"));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void getReportData() {
+        dbReport.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Map<String, String> map = (Map<String, String>) dataSnapshot.getValue();
+                for (int i=0; i<map.size(); i++) {
+                    if (map.get("userID").equals(KEY)) {
+                        Posts post = new Posts(user.getName(), map.get("report"), new SimpleDateFormat("EEE, dd MMM yyyy").format(map.get("time")),map.get("description"),map.get("photos"),user.getImage());
+                        listPosts.add(post);
+                        ct++;
+                    }
+                }
+                Toasty.info(mContext,String.valueOf(ct),2).show();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     public void setStatusBarColor() {
@@ -80,77 +144,124 @@ public class HistoryActivity extends AppCompatActivity {
         window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
     }
 
-    FirebaseRecyclerOptions<Posts> options =
-            new FirebaseRecyclerOptions.Builder<Posts>()
-                    .setQuery(query, Posts.class)
-                    .build();
 
-    FirebaseRecyclerAdapter adapter = new FirebaseRecyclerAdapter<Posts, PostsHolder>(options) {
+
+    public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.PostsHolder> {
+        private List<Posts> postsList;
+
+        PostsAdapter (List<Posts> lp) {
+            this.postsList = lp;
+        }
+
+
+        public class PostsHolder extends RecyclerView.ViewHolder {
+            LinearLayout postsLayout;
+            TextView tvDescription;
+            TextView tvName;
+            TextView tvJenisLaporan;
+            TextView tvTime;
+            ImageView imageUser;
+
+            public PostsHolder(View view) {
+                super(view);
+
+                postsLayout = findViewById(R.id.containerPosts);
+                tvDescription = findViewById(R.id.tvDescriptionHistory);
+                tvName = findViewById(R.id.tvNameHistory);
+                tvJenisLaporan = findViewById(R.id.tvJenisLaporanHistory);
+                tvTime = findViewById(R.id.tvTimeHistory);
+                imageUser = findViewById(R.id.imageUserHistory);
+            }
+        }
+
+
+        @NonNull
         @Override
-        public PostsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
+        public PostsHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View itemView = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.layout_posts, parent, false);
 
-            return new PostsHolder(view);
+            return new PostsHolder(itemView);
         }
 
         @Override
-        protected void onBindViewHolder(final PostsHolder holder, int position, Posts model) {
-            dbReport.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    Map<String, String> map = (Map<String, String>) dataSnapshot.getValue();
-                    map.get(KEY+"_"+Pattern.compile("\\d+"));
-                    holder.tvDescription.setText(map.get("description"));
-                    Picasso.get().load(Uri.parse(map.get("photos"))).noFade().into(holder.imageLaporan);
-                    holder.tvJenisLaporan.setText(map.get("report"));
-                    holder.tvTime.setText(new SimpleDateFormat("EEE, dd MMMM yyyy").format(Date.valueOf(map.get("time"))));
-                    FirebaseDatabase.getInstance().getReference("user").child(KEY).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            Map<String, String> map = (Map<String, String>) dataSnapshot.getValue();
-                            holder.tvName.setText(map.get("name"));
-                            Picasso.get().load(Uri.parse(map.get("image"))).noFade().into(holder.imageUser);
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-
+        public void onBindViewHolder(@NonNull PostsHolder holder, int position) {
+            Posts p = postsList.get(position);
+            InputStream inputStream = null;
+            try {
+                inputStream = getContentResolver().openInputStream(Uri.parse(p.getImgLaporanUri()));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            Drawable yourDrawable = Drawable.createFromStream(inputStream, p.getImgLaporanUri());
+            holder.postsLayout.setBackground(yourDrawable);
+            holder.imageUser.setImageURI(Uri.parse(p.getImgUserUri()));
+            holder.tvDescription.setText(p.getDescription());
+            holder.tvJenisLaporan.setText(p.getJenisLaporan());
+            holder.tvName.setText(p.getName());
+            holder.tvTime.setText(p.getTime());
         }
-    };
 
-    public class PostsHolder extends RecyclerView.ViewHolder {
-        ConstraintLayout containerPosts;
-        TextView tvDescription;
-        TextView tvName;
-        TextView tvJenisLaporan;
-        TextView tvTime;
-        ImageView imageLaporan;
-        ImageView imageUser;
-
-        public PostsHolder(View view) {
-            super(view);
-
-            containerPosts = findViewById(R.id.containerPosts);
-            tvDescription = findViewById(R.id.tvDescriptionHistory);
-            tvName = findViewById(R.id.tvNameHistory);
-            tvJenisLaporan = findViewById(R.id.tvJenisLaporanHistory);
-            tvTime = findViewById(R.id.tvTimeHistory);
-            imageUser = findViewById(R.id.imageUserHistory);
-            imageLaporan = findViewById(R.id.imageReportHistory);
+        @Override
+        public int getItemCount() {
+            return 2;
         }
+
     }
+
+
+
+//    FirebaseRecyclerOptions<Posts> options =
+//            new FirebaseRecyclerOptions.Builder<Posts>()
+//                    .setQuery(query, Posts.class)
+//                    .build();
+//
+//    FirebaseRecyclerAdapter adapter = new FirebaseRecyclerAdapter<Posts, PostsHolder>(options) {
+//        @Override
+//        public PostsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+//            View view = LayoutInflater.from(parent.getContext())
+//                    .inflate(R.layout.layout_posts, parent, false);
+//
+//            return new PostsHolder(view);
+//        }
+//
+//        @Override
+//        protected void onBindViewHolder(final PostsHolder holder, int position, Posts model) {
+//            dbReport.addValueEventListener(new ValueEventListener() {
+//                @Override
+//                public void onDataChange(DataSnapshot dataSnapshot) {
+//                    Map<String, String> map = (Map<String, String>) dataSnapshot.getValue();
+//                    map.get(KEY+"_"+Pattern.compile("\\d+"));
+//                    holder.tvDescription.setText(map.get("description"));
+//                    Picasso.get().load(Uri.parse(map.get("photos"))).noFade().into(holder.imageLaporan);
+//                    holder.tvJenisLaporan.setText(map.get("report"));
+//                    holder.tvTime.setText(new SimpleDateFormat("EEE, dd MMMM yyyy").format(Date.valueOf(map.get("time"))));
+//                    FirebaseDatabase.getInstance().getReference("user").child(KEY).addListenerForSingleValueEvent(new ValueEventListener() {
+//                        @Override
+//                        public void onDataChange(DataSnapshot dataSnapshot) {
+//                            Map<String, String> map = (Map<String, String>) dataSnapshot.getValue();
+//                            holder.tvName.setText(map.get("name"));
+//                            Picasso.get().load(Uri.parse(map.get("image"))).noFade().into(holder.imageUser);
+//                        }
+//
+//                        @Override
+//                        public void onCancelled(DatabaseError databaseError) {
+//
+//                        }
+//                    });
+//
+//                }
+//
+//                @Override
+//                public void onCancelled(DatabaseError databaseError) {
+//
+//                }
+//            });
+//
+//        }
+//    };
+
+
 
 
 //    @Override
