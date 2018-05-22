@@ -133,6 +133,8 @@ public class ProfileActivity extends AppCompatActivity {
                 deleteAccount();
             }
         });
+
+        Toasty.info(this,"Tunggu data nama ke load dulu sebelum change password dan delete account",4,true).show();
     }
 
     @Override
